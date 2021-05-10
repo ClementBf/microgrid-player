@@ -20,6 +20,7 @@ class Player:
 		load = np.zeros(self.horizon)
 		for time in range(self.horizon):
 		 	load[time] =0
+			ok=0
 		return load
 
 	def take_decision(self, time):
