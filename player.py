@@ -18,8 +18,8 @@ class Player:
 
 	def compute_all_load(self):
 		load = np.zeros(self.horizon)
-		# for time in range(self.horizon):
-		# 	load[time] = self.compute_load(time)
+		for time in range(self.horizon):
+		 	load[time] =0
 		return load
 
 	def take_decision(self, time):
@@ -34,3 +34,8 @@ class Player:
 	def reset(self):
 		# reset all observed data
 		pass
+
+if __name__ =='__main__' :
+	mon_acteur=Player()
+	load_0=mon_acteur.compute_load(0)
+	load_1=mon_acteur.compute_load(1)
