@@ -20,6 +20,10 @@ class Player:
 		self.prices = np.random.rand(48)
 		self.deltat=0.5
 		self.pmax=10000000
+		self.lNF = np.zeros(self.horizon)
+		self.HR = np.zeros(self.horizon)
+		self.lHP = np.zeros(self.horizon)
+		self.HDC = np.zeros(self.horizon)
 
 		df = pd.read_csv('data_center_scenarios.csv',sep=';')
 		self.lIT= df['cons (kW)']
@@ -97,3 +101,4 @@ class Player:
 if __name__ =='__main__' :
 	mon_acteur=Player()
 	load= mon_acteur.compute_all_load()
+	print(load)
