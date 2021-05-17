@@ -25,6 +25,7 @@ class Player:
 		self.lHP = np.zeros(self.horizon)
 		self.HDC = np.zeros(self.horizon)
 		self.alpha = np.ones(self.horizon)
+		self.bill=0
 
 		df = pd.read_csv('data_center_scenarios.csv',sep=';')
 		self.lIT= df['cons (kW)']
@@ -84,7 +85,10 @@ class Player:
 		return load
 
 	def compute_bill(self):
-		self.bill= np.sum((self.lIT+self.lNF)*self.prices +self.lHP*self.prices -self.HDC*self.prices_hw)
+		bill=0
+		for t in range(self.horizon) :
+			bill+=(self.lIT[t]+self.lNF[t])*self.prices[t] +self.lHP[t]*self.prices[t] -self.HDC[t]*self.prices_hw[t]
+		self.bill= bill
 
 	def take_decision(self, time):
 		# TO BE COMPLETED
@@ -107,6 +111,8 @@ if __name__ =='__main__' :
 	mon_acteur.global_decision()
 	mon_acteur.compute_lHP()
 	mon_acteur.compute_HDC()
+	mon_acteur.compute_bill()
 	load= mon_acteur.compute_all_load()
+	print(mon_acteur.bill)
 	print(load)
 	print(mon_acteur.alpha)
