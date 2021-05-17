@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib
+import pulp
+
 
 
 class Player:
@@ -17,16 +19,18 @@ class Player:
 		self.prices_hw = np.random.rand(48)
 		self.prices = np.random.rand(48)
 		self.deltat=0.5
+		self.pmax=10000000
+
+		df = pd.read_csv('data_center_scenarios.csv',sep=';')
+		self.lIT= df['cons (kW)']
 
 	def set_scenario(self, scenario_data):
 		self.data = scenario_data
 
 	def set_lNF(self):
-		df_nf = (self.data).copy()
-		lNF = np.zeros(self.horizon)
+		self.lNF = np.zeros(self.horizon)
 		for i in range(len(self.data)):
-			lNF[i] = df_nf['cons (kW)'][i] * (1 + 1 / ((self.eer)*(self.deltat))
-		self.lNF = lNF
+			self.lNF[i] = self.lIT[i] * (1 + 1 / (self.eer*self.deltat))
 
 
 	def set_prices(self, prices):
@@ -35,14 +39,14 @@ class Player:
 	def compute_HR(self):
 		HR = np.zeros(self.horizon)
 		for i in range(len(self.data)):
-			HR[i] = self.data['cons (kW)'][i] * self.cop_cs/self.eer
+			HR[i] = self.lIT[i] * self.cop_cs/self.eer
 
 		self.HR = HR
 
 	def compute_all_load(self):
 		load = np.zeros(self.horizon)
 		for time in range(self.horizon):
-		 	load[time]=0
+		 	load[time]= self.lIT[time]+self.lNF[time]+self.lHP[time]
 		return load
 
 	def compute_lHP(self):
@@ -56,11 +60,30 @@ class Player:
 			self.HDC[i] = self.cop_hp * self.deltat * self.lHP[i]
 
 	def compute_bill(self):
-		self.bill= np.sum(self.data['cons (kW)']+self.lNF)*self.lambd +lHP(alpha,lIT,deltat)*lambd -HDC(alpha,lIT,deltat)*price)
+		self.bill= np.sum((self.lIT+self.lNF)*self.prices +self.lHP*self.prices -self.HDC*self.prices_hw)
 
 	def take_decision(self, time):
 		# TO BE COMPLETED
 		return 0
+
+	def global_decision(self):
+		self.alpha = np.zeros[self.horizon]
+
+		lp = pulp.LpProblem('data_center', pulp.LpMinimize)
+		lp.setSolver()
+		alphao = {}
+		for t in range(self.horizon):
+			var_name = 'alphao_' + str(t)
+			alphao[t] = pulp.LpVariable(var_name, 0.0, 1.0)
+
+			constraint_name = "limitation_" + str(t)
+			lp += self.cop_hp * self.deltat * alphao[t] * self.lIT[t] * (self.cop_cs/self.eer) / ((self.cop_hp - 1)*self.deltat)<=10
+			constraint_name = "puissancemax_" + str(t)
+			lp += self.lIT[t] + self.lIT[t] * (1 + 1 / (self.eer*self.deltat)) + alphao[t] * self.lIT[t] * self.cop_cs/self.eer / ((self.cop_hp - 1)*self.deltat) <= self.pmax[t]
+
+		lp.setObjective(pulp.lpSum([(self.lIT[t]+self.lIT[t] * (1 + 1 / (self.eer*self.deltat)))*self.prices[t] +alphao[t] * self.lIT[t] * self.cop_cs/self.eer / ((self.cop_hp - 1)*self.deltat)*self.prices[t]
+									-self.cop_hp * self.deltat * alphao[t] * self.lIT[t] * self.cop_cs/self.eer / ((self.cop_hp - 1)*self.deltat)*self.prices_hw[t] for t in range(self.horizon)]))
+		self.alpha = alphao
 
 	def compute_load(self, time):
 		load = self.take_decision(time)
@@ -73,5 +96,4 @@ class Player:
 
 if __name__ =='__main__' :
 	mon_acteur=Player()
-	load_0=mon_acteur.compute_load(0)
-	load_1=mon_acteur.compute_load(1)
+	load= mon_acteur.compute_all_load()
