@@ -79,6 +79,12 @@ class Player:
 			self.HDC[i] = self.cop_hp * self.deltat * self.lHP[i]
 
 	def compute_all_load(self):
+		self.set_lNF()
+		self.compute_HR()
+		self.global_decision()
+		self.compute_lHP()
+		self.compute_HDC()
+		self.compute_bill()
 		load = np.zeros(self.horizon)
 		for time in range(self.horizon):
 		 	load[time]= self.lIT[time]+self.lNF[time]+self.lHP[time]
@@ -106,12 +112,6 @@ class Player:
 
 if __name__ =='__main__' :
 	mon_acteur=Player()
-	mon_acteur.set_lNF()
-	mon_acteur.compute_HR()
-	mon_acteur.global_decision()
-	mon_acteur.compute_lHP()
-	mon_acteur.compute_HDC()
-	mon_acteur.compute_bill()
 	load= mon_acteur.compute_all_load()
 	print(mon_acteur.bill)
 	print(load)
