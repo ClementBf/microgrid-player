@@ -18,8 +18,8 @@ class Player:
 		self.cop_hp = 0.4 * (60 + 273) / 25
 		self.prices_hw = np.random.rand(48)
 		self.prices = np.random.rand(48)
-		self.deltat=0.5
-		self.pmax= 1000*np.ones(self.horizon)
+		self.deltat = 0.5
+		self.pmax= 100*np.ones(self.horizon)
 		self.lNF = np.zeros(self.horizon)
 		self.HR = np.zeros(self.horizon)
 		self.lHP = np.zeros(self.horizon)
@@ -28,7 +28,7 @@ class Player:
 		self.bill=0
 
 		df = pd.read_csv('data_center_scenarios.csv',sep=';')
-		self.lIT= df['cons (kW)']
+		self.lIT= df['cons (kW)'][0:48]
 
 	def set_scenario(self, scenario_data):
 		self.data = scenario_data
@@ -113,6 +113,8 @@ class Player:
 if __name__ =='__main__' :
 	mon_acteur=Player()
 	load= mon_acteur.compute_all_load()
+	#print(mon_acteur.prices)
+	#print(mon_acteur.prices_hw)
 	print(mon_acteur.bill)
 	print(load)
 	print(mon_acteur.alpha)
